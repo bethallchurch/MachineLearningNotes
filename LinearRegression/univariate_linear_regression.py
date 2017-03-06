@@ -1,6 +1,7 @@
 from matplotlib import pyplot as plt
+import numpy as np
 
-test_training_set = [
+test_training_set = np.array([
   [1, 2],
   [2, 3],
   [2, 4],
@@ -14,7 +15,7 @@ test_training_set = [
   [7, 5],
   [8, 6],
   [9, 6]
-]
+])
 
 class UnivariateLinearRegression(object):
 
@@ -26,7 +27,8 @@ class UnivariateLinearRegression(object):
     self.theta_1 = initial_theta_1
     self.learning_rate = learning_rate
     self.iterations = iterations
-    self.training_set = training_set
+    self.X = training_set[:, 0]
+    self.Y = training_set[:, 1]
 
   def fit(self, graph=False):
     # Start walking down the cost function.
@@ -47,68 +49,43 @@ class UnivariateLinearRegression(object):
 
   def sum_squared_error(self):
     """
-    Explicit implementation of sum of squared errors function.
+    Implementation of sum of squared errors.
     """
-    m = len(self.training_set) # Number of samples in the training set.
-    total_error = 0
-    # For each sample...
-    for sample in self.training_set:
-      # find the input variable,
-      x = sample[0]
-      # the actual output variable,
-      y = sample[1]
-      # and the predicted output variable.
-      predicted_y = self.hypothesis(x)
-      # Calculate the difference between the predicted value and the actual value.
-      # Square it to make it an absolute value.
-      difference = (predicted_y - y) ** 2
-      # Add it to the sum of the total errors.
-      total_error += difference
+    m = len(self.X) # Number of samples in the training set.
+    # Run through all input variables and predict y values for them.
+    predicted_Y = self.hypothesis(self.X)
+    # Calculate the differences between the predicted value and the actual value.
+    error = sum((self.Y - predicted_Y) ** 2)
     # Find the mean error.
-    mean_error = total_error / m
+    mean_error = error / m
     # Divide by 2 for convenience when calculating gradient descent.
     return mean_error / 2
 
   def theta_0_derivative(self):
     """
-    The derivative of ... with respect to theta 0.
+    The partial derivative of the cost function with respect to theta 0.
     """
-    m = len(self.training_set) # Number of samples in the training set.
-    total = 0
-    for sample in self.training_set:
-      # find the input variable,
-      x = sample[0]
-      # the actual output variable,
-      y = sample[1]
-      # and the predicted output variable.
-      predicted_y = self.hypothesis(x)
-      # Find the difference.
-      difference = predicted_y - y
-      # Add to total.
-      total += difference
-      # Divide by m.
-      return total / m
+    m = len(self.X) # Number of samples in the training set.
+    # The predicted output variables.
+    predicted_Y = self.hypothesis(self.X)
+    # The difference.
+    difference = sum(predicted_Y - self.Y)
+    # The average difference.
+    average_difference = difference / m
+    return average_difference
 
   def theta_1_derivative(self):
     """
-    The derivative of ... with respect to theta 1.
+    The partial derivative of the cost function with respect to theta 1.
     """
-    m = len(self.training_set) # Number of samples in the training set.
-    total = 0
-    for sample in self.training_set:
-      # find the input variable,
-      x = sample[0]
-      # the actual output variable,
-      y = sample[1]
-      # and the predicted output variable.
-      predicted_y = self.hypothesis(x)
-      # Find the difference.
-      difference = predicted_y - y
-      # Add to total.
-      total += (difference * x)
-      # Divide by m.
-      return total / m
-
+    m = len(self.X) # Number of samples in the training set.
+    # The predicted output variables.
+    predicted_Y = self.hypothesis(self.X)
+    # The difference.
+    difference = sum((predicted_Y - self.Y) * self.X)
+    # The average difference.
+    average_difference = difference / m
+    return average_difference
 
   def gradient_descent(self):
     """
@@ -126,17 +103,13 @@ class UnivariateLinearRegression(object):
     """
     Show the training set and hypothesis function on the same graph.
     """
-    # All the x values in the training set.
-    x_values = [sample[0] for sample in self.training_set]
-    # All the y values in the training set.
-    y_values = [sample[1] for sample in self.training_set]
     # All the predicted y values, as given by the hypothesis function.
-    predicted_y_values = [self.hypothesis(x) for x in x_values]
+    predicted_Y = self.hypothesis(self.X)
     # Plot the training set.
-    plt.plot(x_values, y_values, 'rx')
+    plt.plot(self.X, self.Y, 'rx')
     # Plot the hypothesis.
-    plt.plot(x_values, predicted_y_values)
+    plt.plot(self.X, predicted_Y)
     # Make sure the axes start and stop in the right places.
-    plt.axis([0, max(x_values) + 1, 0, max(y_values) + 1])
+    plt.axis([0, max(self.X) + 1, 0, max(self.Y) + 1])
     # Show the graph.
     plt.show()
